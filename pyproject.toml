@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "lazarus-wakeup"
+version = "1.0.0"
+description = "A Python-Based Tool for Reconnaissance and State Management of AD Principals"
+authors = ["Nikos Vourdas <nickvourd97@gmail.com>"]
+readme = "README.md"
+packages = [{include = "lazarus_wakeup"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+ldap3 = "^2.9.1"
+impacket = "^0.11.0"
+colorama = "^0.4.6"
+pyasn1 = "^0.5.0"
+dnspython = "^2.4.2"
+
+[tool.poetry.scripts]
+lazarus-wakeup = "lazarus_wakeup.main:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

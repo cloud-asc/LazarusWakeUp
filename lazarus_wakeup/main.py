@@ -98,38 +98,49 @@ class LazarusWakeUp:
         return targets
 
     def find_disabled_objects(self):
-        """Find disabled objects (users and computers) and analyze their relationships"""
-        self.logger.info("Searching for disabled AD objects (users and computers)...")
+        """Find specific disabled objects and analyze their relationships"""
+        targets = self.get_targets()
         
-        # UserAccountControl bit 2 = ACCOUNTDISABLE
-        # Search for both users and computers
-        ldap_filter = "(&(userAccountControl:1.2.840.113556.1.4.803:=2)(|(objectClass=user)(objectClass=computer))(!(sAMAccountName=Guest))(!(sAMAccountName=krbtgt)))"
-        
-        attributes = [
-            'distinguishedName', 'cn', 'sAMAccountName', 'objectClass',
-            'description', 'userAccountControl', 'whenCreated', 'whenChanged',
-            'memberOf', 'pwdLastSet', 'lastLogon', 'servicePrincipalName'
-        ]
-        
-        entries = self.ldap.search(ldap_filter, attributes)
-        
-        # Additional client-side filtering (case-insensitive)
-        filtered_entries = []
-        for entry in entries:
-            sam = str(entry.sAMAccountName) if entry.sAMAccountName else None
-            if not self.is_excluded_account(sam):
-                filtered_entries.append(entry)
-            else:
-                self.logger.debug(f"Excluded account: {sam}")
-        
-        if not filtered_entries:
-            self.logger.warning("No disabled objects found (excluding Guest and krbtgt)")
+        if not targets:
+            self.logger.error("No targets specified. Use -t for single target or -tl for target list")
             return
         
-        self.logger.success(f"Found {len(filtered_entries)} disabled objects (excluding Guest and krbtgt)")
+        self.logger.info(f"Searching for {len(targets)} specific disabled AD object(s)...")
+        
+        found_entries = []
+        
+        for target in targets:
+            self.logger.verbose(f"Searching for: {target}")
+            
+            # Build filter for specific target
+            ldap_filter = f"(&(userAccountControl:1.2.840.113556.1.4.803:=2)(|(objectClass=user)(objectClass=computer))(sAMAccountName={target}))"
+            
+            attributes = [
+                'distinguishedName', 'cn', 'sAMAccountName', 'objectClass',
+                'description', 'userAccountControl', 'whenCreated', 'whenChanged',
+                'memberOf', 'pwdLastSet', 'lastLogon', 'servicePrincipalName'
+            ]
+            
+            entries = self.ldap.search(ldap_filter, attributes)
+            
+            if entries:
+                sam = str(entries[0].sAMAccountName) if entries[0].sAMAccountName else None
+                if not self.is_excluded_account(sam):
+                    found_entries.append(entries[0])
+                    self.logger.debug(f"Found: {target}")
+                else:
+                    self.logger.warning(f"Skipped excluded account: {target}")
+            else:
+                self.logger.warning(f"Not found or not disabled: {target}")
+        
+        if not found_entries:
+            self.logger.warning("No disabled objects found")
+            return
+        
+        self.logger.success(f"Found {len(found_entries)} disabled object(s)")
         
         # Display results with relationship analysis
-        self.display_and_analyze_objects(filtered_entries)
+        self.display_and_analyze_objects(found_entries)
 
     def find_all_disabled_objects(self):
         """Find all disabled objects including groups, OUs, etc. and analyze their relationships"""
@@ -319,7 +330,10 @@ class LazarusWakeUp:
             
             # Confirm if not forcing
             if not self.args.force and len(targets) == 1:
-                response = input(f"\n{Fore.YELLOW}[!]{Style.RESET_ALL} Enable {target}? (yes/no): ")
+                response = input(f"\n{Fore.YELLOW}[!]{Style.RESET_ALL} Enable {target}? (Yes/no) [Yes]: ").strip()
+                # Default to 'yes' if empty (just pressed Enter)
+                if response == '':
+                    response = 'yes'
                 if response.lower() not in ['yes', 'y']:
                     self.logger.warning("Operation cancelled")
                     continue
@@ -403,7 +417,10 @@ class LazarusWakeUp:
             
             # Confirm if not forcing
             if not self.args.force and len(targets) == 1:
-                response = input(f"\n{Fore.YELLOW}[!]{Style.RESET_ALL} Disable {target}? (yes/no): ")
+                response = input(f"\n{Fore.YELLOW}[!]{Style.RESET_ALL} Disable {target}? (Yes/no) [Yes]: ").strip()
+                # Default to 'yes' if empty (just pressed Enter)
+                if response == '':
+                    response = 'yes'
                 if response.lower() not in ['yes', 'y']:
                     self.logger.warning("Operation cancelled")
                     continue
@@ -431,11 +448,15 @@ class LazarusWakeUp:
 def print_banner():
     """Print tool banner"""
     banner = f"""{Fore.GREEN}
-    ╦  ╔═╗ ╔═╗ ╔═╗ ╦═╗ ╦ ╦ ╔═╗   ╦ ╦ ╔═╗ ╦╔═ ╔═╗ ╦ ╦ ╔═╗
-    ║  ╠═╣ ╔═╝ ╠═╣ ╠╦╝ ║ ║ ╚═╗   ║║║ ╠═╣ ╠╩╗ ║╣  ║ ║ ╠═╝
-    ╩═╝╩ ╩ ╩   ╩ ╩ ╩╚═ ╚═╝ ╚═╝   ╚╩╝ ╩ ╩ ╩ ╩ ╚═╝ ╚═╝ ╩  
+██╗      █████╗ ███████╗ █████╗ ██████╗ ██╗   ██╗███████╗    ██╗    ██╗ █████╗ ██╗  ██╗███████╗██╗   ██╗██████╗ 
+██║     ██╔══██╗╚══███╔╝██╔══██╗██╔══██╗██║   ██║██╔════╝    ██║    ██║██╔══██╗██║ ██╔╝██╔════╝██║   ██║██╔══██╗
+██║     ███████║  ███╔╝ ███████║██████╔╝██║   ██║███████╗    ██║ █╗ ██║███████║█████╔╝ █████╗  ██║   ██║██████╔╝
+██║     ██╔══██║ ███╔╝  ██╔══██║██╔══██╗██║   ██║╚════██║    ██║███╗██║██╔══██║██╔═██╗ ██╔══╝  ██║   ██║██╔═══╝ 
+███████╗██║  ██║███████╗██║  ██║██║  ██║╚██████╔╝███████║    ╚███╔███╔╝██║  ██║██║  ██╗███████╗╚██████╔╝██║     
+╚══════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝     ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝     
+                                                                                                                
 {Style.RESET_ALL}
-              Resurrect Disabled AD Principals v1.0.0
+              A Python-Based Tool for Reconnaissance and State Management of AD Principals v1.0.0
 {Fore.CYAN}{'='*80}{Style.RESET_ALL}
     """
     print(banner)
@@ -446,11 +467,14 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 Examples:
-  # Find disabled users and computers (with relationship analysis)
-  lazarus-wakeup -d CORP.LOCAL -u administrator -p Password123 -a find
+  # Find all disabled users and computers (with relationship analysis)
+  lazarus-wakeup -d CORP.LOCAL -u administrator -p Password123 -a find-all
 
-  # Find all types of disabled objects (with relationship analysis)
-  lazarus-wakeup -d CORP.LOCAL -u admin -p Pass123 -a find-all
+  # Find specific disabled user
+  lazarus-wakeup -d CORP.LOCAL -u admin -p Pass123 -a find -t jdoe
+
+  # Find multiple specific disabled users from file
+  lazarus-wakeup -d CORP.LOCAL -u admin -p Pass123 -a find -tl disabled_users.txt
 
   # Enable a disabled user
   lazarus-wakeup -d CORP.LOCAL -u admin -p Pass123 -a enable -t jdoe
@@ -462,17 +486,19 @@ Examples:
   lazarus-wakeup -d CORP.LOCAL -u admin -p Pass123 -a disable -t jdoe
 
   # Use NTLM hash
-  lazarus-wakeup -d CORP.LOCAL -u admin -H :a87f3a337d73085c45f9416be5787d86 -a find
+  lazarus-wakeup -d CORP.LOCAL -u admin -H :a87f3a337d73085c45f9416be5787d86 -a find-all
 
   # Use Kerberos
-  lazarus-wakeup -d CORP.LOCAL -u admin -p Pass123 -k -a find
+  lazarus-wakeup -d CORP.LOCAL -u admin -p Pass123 -k -a find-all
 
   # Use LDAPS
-  lazarus-wakeup -d CORP.LOCAL -u admin -p Pass123 --use-ldaps -a find
+  lazarus-wakeup -d CORP.LOCAL -u admin -p Pass123 --use-ldaps -a find-all
 
 Note: 
   - Guest and krbtgt accounts are automatically excluded from all operations
-  - find and find-all actions automatically analyze inbound relationships for all discovered objects
+  - find requires -t or -tl to specify targets
+  - find-all searches all disabled objects without requiring targets
+  - Both find and find-all automatically analyze inbound relationships
         '''
     )
 
@@ -515,9 +541,9 @@ Note:
                            help='Use Kerberos authentication. Grabs credentials from .ccache file (KRB5CCNAME) based on target parameters. If valid credentials cannot be found, it will use the ones specified in the command line')
 
     # Target arguments
-    target_group = parser.add_argument_group('arguments when setting -action to enable or disable')
+    target_group = parser.add_argument_group('arguments when setting -action to find, enable or disable')
     target_group.add_argument('-t', '--target', metavar='TARGET_SAMNAME',
-                             help='Target account')
+                             help='Target account (required for find, enable, disable)')
     target_group.add_argument('-tl', '--target-list', metavar='TARGET_SAMNAME_LIST',
                              help='Path to a file with target accounts names (one per line)')
     
@@ -543,7 +569,7 @@ Note:
     # Set ssl flag based on use_ldaps
     args.ssl = args.use_ldaps
 
-    # Validation
+   # Validation
     if not args.action:
         parser.error("Action (-a/--action) is required")
     
@@ -557,10 +583,16 @@ Note:
     if not any([args.password, args.hashes, args.kerberos, args.no_pass, args.aes_key]):
         parser.error("Authentication required: use -p, -H, -k, --aes-key, or --no-pass")
     
-    # Check target for actions that need it
-    if args.action in ['enable', 'disable']:
+    # Check target requirements for different actions
+    if args.action in ['enable', 'disable', 'find']:
+        # These actions REQUIRE targets
         if not args.target and not args.target_list:
             parser.error(f"Action '{args.action}' requires either -t or -tl")
+    
+    if args.action == 'find-all':
+        # find-all does NOT accept targets
+        if args.target or args.target_list:
+            parser.error("Action 'find-all' does not accept -t or -tl (it searches all disabled objects automatically)")
 
     print_banner()
 

@@ -149,4 +149,5 @@ Note:
 ## References
 
 - [DACL by The Hacker Recipes](https://www.thehacker.recipes/ad/movement/dacl/)
+- [An ACE Up the Sleeve by SpecterOps](https://specterops.io/wp-content/uploads/sites/3/2022/06/an_ace_up_the_sleeve.pdf)
 

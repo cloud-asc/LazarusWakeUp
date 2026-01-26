@@ -43,3 +43,110 @@ Special thanks to my brother [@kavasilo](https://x.com/kavasilo) who provided in
 LazarusWakeUp was created with :heart: by [@nickvourd](https://x.com/nickvourd).
 
 ## Installation
+
+⚠️ Please ensure that Poetry is installed on your system.
+
+1) Clone the repository by executing the following command:
+
+```
+git clone https://github.com/nickvourd/LazarusWakeUp.git
+```
+
+2) Once the repository is cloned, navigate into the LazarusWakeUp directory:
+
+```
+cd LazarusWakeUp
+```
+
+3) Install dependencies with Poetry:
+
+```
+poetry install
+```
+
+4) Verify installation:
+
+```
+poetry run lazarus-wakeup --help
+```
+
+## Usage
+
+```
+LazarusWakeUp - Find, enable/disable, and analyze disabled AD principals
+
+options:
+  -h, --help            show this help message and exit
+  -a, --action {enable,disable,find,find-all}
+                        Action to operate on disabled accounts
+  --use-ldaps           Use LDAPS instead of LDAP
+  --use-schannel        Use LDAP Schannel (TLS) for certificate-based authentication
+  -v, --verbose         verbosity level (-v for verbose, -vv for debug)
+  --force               Skip confirmation prompts (for batch operations)
+  --port PORT           Custom LDAP port (default: 389 or 636 for LDAPS)
+
+authentication & connection:
+  --dc-ip ip address    IP Address of the domain controller or KDC (Key Distribution Center) for Kerberos. If omitted it will use the domain part (FQDN) specified in the identity
+                        parameter
+  -d, --domain DOMAIN   (FQDN) domain to authenticate to
+  -u, --user USER       user to authenticate with
+  -crt, --certfile CERTFILE
+                        Path to the user certificate (PEM format) for Schannel authentication
+  -key, --keyfile KEYFILE
+                        Path to the user private key (PEM format) for Schannel authentication
+  -td, --target-domain TARGET_DOMAIN
+                        Target domain (if different than the domain of the authenticating user)
+  --no-pass             don't ask for password (useful for -k)
+  -p, --password PASSWORD
+                        password to authenticate with
+  -H, --hashes [LMHASH:]NTHASH
+                        NT/LM hashes, format is LMhash:NThash
+  --aes-key hex key     AES key to use for Kerberos Authentication (128 or 256 bits)
+  -k, --kerberos        Use Kerberos authentication. Grabs credentials from .ccache file (KRB5CCNAME) based on target parameters. If valid credentials cannot be found, it will use the
+                        ones specified in the command line
+
+arguments when setting -action to find, enable or disable:
+  -t, --target TARGET_SAMNAME
+                        Target account (required for find, enable, disable)
+  -tl, --target-list TARGET_SAMNAME_LIST
+                        Path to a file with target accounts names (one per line)
+
+Examples:
+  # Find all disabled users and computers (with relationship analysis)
+  lazarus-wakeup -d CORP.LOCAL -u administrator -p Password123 -a find-all
+
+  # Find specific disabled user
+  lazarus-wakeup -d CORP.LOCAL -u admin -p Pass123 -a find -t jdoe
+
+  # Find multiple specific disabled users from file
+  lazarus-wakeup -d CORP.LOCAL -u admin -p Pass123 -a find -tl disabled_users.txt
+
+  # Enable a disabled user
+  lazarus-wakeup -d CORP.LOCAL -u admin -p Pass123 -a enable -t jdoe
+
+  # Enable multiple users from file
+  lazarus-wakeup -d CORP.LOCAL -u admin -p Pass123 -a enable -tl targets.txt --force
+
+  # Disable a user
+  lazarus-wakeup -d CORP.LOCAL -u admin -p Pass123 -a disable -t jdoe
+
+  # Use NTLM hash
+  lazarus-wakeup -d CORP.LOCAL -u admin -H :a87f3a337d73085c45f9416be5787d86 -a find-all
+
+  # Use Kerberos
+  lazarus-wakeup -d CORP.LOCAL -u admin -p Pass123 -k -a find-all
+
+  # Use LDAPS
+  lazarus-wakeup -d CORP.LOCAL -u admin -p Pass123 --use-ldaps -a find-all
+
+Note: 
+  - Guest and krbtgt accounts are automatically excluded from all operations
+  - find requires -t or -tl to specify targets
+  - find-all searches all disabled objects without requiring targets
+  - Both find and find-all automatically analyze inbound relationships
+```
+
+## References
+
+
+

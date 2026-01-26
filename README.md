@@ -1,6 +1,6 @@
 # LazarusWakeUp
 
-A Python-Based Tool for Reconnaissance and State Management of AD Principals
+A Python-Based Tool for Reconnaissance and State Management of AD Principals.
 
 <p align="center">
   <img width="400" height="300" src="/Pictures/logo.png"><br /><br />
@@ -13,7 +13,7 @@ A Python-Based Tool for Reconnaissance and State Management of AD Principals
 
 ## Description
 
-LazarusWakeUp is a Python-based tool for enumerating and managing disabled Active Directory principals.
+LazarusWakeUp is a Python-based tool for enumerating and managing disabled Active Directory principals. Based on this research.
 
 ![Static Badge](https://img.shields.io/badge/Python-3.x-green?style=flat&logoSize=auto)
 ![Static Badge](https://img.shields.io/badge/Poetry-blue?style=flat&logoSize=auto)

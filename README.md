@@ -38,7 +38,7 @@ The authors and contributors of this project are not liable for any illegal use 
 
 ## Acknowledgement
 
-Special thanks to my brother [@kavasilo](https://x.com/kavasilo) who provided invaluable assistance during the development proceess of this tool.
+Special thanks to my brother [@kavasilo](https://x.com/kavasilo), who provided invaluable assistance during the development proceess of this tool.
 
 LazarusWakeUp was created with :heart: by [@nickvourd](https://x.com/nickvourd).
 

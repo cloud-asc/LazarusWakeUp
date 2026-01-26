@@ -18,3 +18,28 @@ LazarusWakeUp is a Python-based tool for enumerating and managing disabled Activ
 ![Static Badge](https://img.shields.io/badge/Python-green?style=flat&logoSize=auto)
 ![Static Badge](https://img.shields.io/badge/Poetry-blue?style=flat&logoSize=auto)
 ![Static Badge](https://img.shields.io/badge/Version-1.0.0%20-red?link=https%3A%2F%2Fgithub.com%2Fnickvourd%2FLazarusWakeUp%2Freleases)
+
+> If you find any bugs, don’t hesitate to [report them](https://github.com/nickvourd/LazarusWakeUp/issues). Your feedback is valuable in improving the quality of this project!
+
+## Disclaimer
+
+The authors and contributors of this project are not liable for any illegal use of the tool. It is intended for educational purposes only. Users are responsible for ensuring lawful usage.
+
+## Table of Contents
+
+- [LazarusWakeUp](#lazaruswakeup)
+  - [Description](#description)
+  - [Disclaimer](#disclaimer)
+  - [Table of Contents](#table-of-contents)
+  - [Acknowledgement](#acknowledgement)
+  - [Installation](#installation)
+  - [Usage](#usage)
+  - [References](#references)
+
+## Acknowledgement
+
+Special thanks to my brother [@kavasilo](https://x.com/kavasilo) who provided invaluable assistance during the development proceess of this tool.
+
+LazarusWakeUp was created with :heart: by [@nickvourd](https://x.com/nickvourd).
+
+## Installation

@@ -17,7 +17,7 @@ LazarusWakeUp is a Python-based tool for enumerating and managing disabled Activ
 
 ![Static Badge](https://img.shields.io/badge/Python-3.x-green?style=flat&logoSize=auto)
 ![Static Badge](https://img.shields.io/badge/Poetry-blue?style=flat&logoSize=auto)
-![Static Badge](https://img.shields.io/badge/Version-1.0%20-red)
+![Static Badge](https://img.shields.io/badge/Version-1.1%20-red)
 
 > If you find any bugs, don’t hesitate to [report them](https://github.com/nickvourd/LazarusWakeUp/issues). Your feedback is valuable in improving the quality of this project!
 
